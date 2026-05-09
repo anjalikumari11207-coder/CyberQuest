@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberQuest — CyberCity</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/world.css">
+  <link rel="stylesheet" href="css/games.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <canvas id="world-canvas"></canvas>
+  <div class="scanline-overlay"></div>
+
+  <!-- Zone enter flash -->
+  <div class="zone-enter-flash" id="zone-flash"></div>
+
+  <!-- HUD: Player Info -->
+  <div class="hud-player" id="hud-player">
+    <div class="hud-avatar" id="hud-avatar">🦸</div>
+    <div class="hud-username" id="hud-username">CyberHero</div>
+    <div class="hud-level" id="hud-level">⚡ Level 1 — Noob 🐣</div>
+    <div class="hud-xp-label">
+      <span>XP</span><span id="hud-xp-val">0 / 200</span>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-fill" id="hud-xp-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- HUD: Top Right -->
+  <div class="hud-top-right">
+    <div class="hud-streak-card">
+      <div class="streak-fire">🔥</div>
+      <div>
+        <div class="hud-streak-count" id="hud-streak">0</div>
+        <div class="hud-streak-label">Day Streak</div>
+      </div>
+    </div>
+    <div class="hud-btns">
+      <button class="hud-btn" onclick="window.location.href='dashboard.html'">📊 Dashboard</button>
+      <button class="hud-btn" onclick="Auth.logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- Zone Label -->
+  <div class="hud-zone-label" id="hud-zone-label">🌍 Welcome to CyberCity</div>
+
+  <!-- Controls Hint -->
+  <div class="hud-controls">
+    🖱️ Drag to rotate &nbsp;|&nbsp; Scroll to zoom<br>
+    🖱️ Click a building to enter
+  </div>
+
+  <!-- World Intro Modal -->
+  <div class="world-intro" id="world-intro">
+    <div class="world-intro-card">
+      <div class="world-intro-icon">🌍</div>
+      <h1 class="world-intro-title gradient-text">Welcome to CyberCity!</h1>
+      <p class="world-intro-sub">
+        Navigate the 3D city and click on any building to start a cybersecurity mission.
+        Complete all 6 modules to become a <strong style="color:var(--cyan)">CyberHero</strong>!
+      </p>
+      <div class="world-zone-cards">
+        <div class="world-zone-mini">📖<span>Alex's Story</span></div>
+        <div class="world-zone-mini">🔐<span>Password Fortress</span></div>
+        <div class="world-zone-mini">🎣<span>Phishing Lake</span></div>
+        <div class="world-zone-mini">🌀<span>Malware Maze</span></div>
+        <div class="world-zone-mini">🔒<span>Social Shield</span></div>
+        <div class="world-zone-mini">🦸<span>Hero HQ</span></div>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="closeIntro()">⚡ ENTER CYBERCITY</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- GAME OVERLAYS                               -->
+  <!-- ════════════════════════════════════════════ -->
+
+  <!-- Game: Alex's Story -->
+  <div class="game-overlay hidden" id="game-alex">
+    <div class="game-topbar">
+      <div class="game-topbar-title">📖 Alex's Story — The Awakening</div>
+      <button class="game-topbar-close" onclick="closeGame('game-alex')">✕ CLOSE</button>
+    </div>
+    <div class="game-content" id="alex-content"></div>
+  </div>
+
+  <!-- Game: Password Fortress -->
+  <div class="game-overlay hidden" id="game-password">
+    <div class="game-topbar">
+      <div class="game-topbar-title">🔐 Password Fortress</div>
+      <button class="game-topbar-close" onclick="closeGame('game-password')">✕ CLOSE</button>
+    </div>
+    <div class="game-stats-bar">
+      <div class="stat-item">Challenge: <span id="pwd-challenge-num">1/4</span></div>
+      <div class="stat-item">Score: <span id="pwd-score">0</span></div>
+    </div>
+    <div class="game-content" id="password-content"></div>
+  </div>
+
+  <!-- Game: Phishing Lake -->
+  <div class="game-overlay hidden" id="game-phishing">
+    <div class="game-topbar">
+      <div class="game-topbar-title">🎣 Phishing Lake — Spot the Bait</div>
+      <button class="game-topbar-close" onclick="closeGame('game-phishing')">✕ CLOSE</button>
+    </div>
+    <div class="game-stats-bar">
+      <div class="stat-item">Score: <span id="phish-score">0</span></div>
+      <div class="stat-item">Correct: <span id="phish-correct">0</span></div>
+      <div class="stat-item">Remaining: <span id="phish-remaining">8</span></div>
+    </div>
+    <div class="game-content" id="phishing-content"></div>
+  </div>
+
+  <!-- Game: Malware Maze -->
+  <div class="game-overlay hidden" id="game-malware">
+    <div class="game-topbar">
+      <div class="game-topbar-title">🌀 Malware Maze — Safe Browsing Challenge</div>
+      <button class="game-topbar-close" onclick="closeGame('game-malware')">✕ CLOSE</button>
+    </div>
+    <div class="game-stats-bar">
+      <div class="stat-item">Score: <span id="maze-score">100</span></div>
+      <div class="stat-item">Traps Avoided: <span id="maze-avoided">0</span></div>
+      <div class="stat-item stat-timer">Time: <span id="maze-timer">90</span>s</div>
+    </div>
+    <div class="game-content" id="malware-content"></div>
+  </div>
+
+  <!-- Game: Social Shield -->
+  <div class="game-overlay hidden" id="game-social">
+    <div class="game-topbar">
+      <div class="game-topbar-title">🔒 Social Media Shield</div>
+      <button class="game-topbar-close" onclick="closeGame('game-social')">✕ CLOSE</button>
+    </div>
+    <div class="game-content" id="social-content"></div>
+  </div>
+
+  <!-- Game: CyberHero HQ -->
+  <div class="game-overlay hidden" id="game-hero">
+    <div class="game-topbar">
+      <div class="game-topbar-title">🦸 CyberHero HQ — Final Challenge</div>
+      <button class="game-topbar-close" onclick="closeGame('game-hero')">✕ CLOSE</button>
+    </div>
+    <div class="game-stats-bar">
+      <div class="stat-item">Question: <span id="quiz-num-display">1/15</span></div>
+      <div class="stat-item">Score: <span id="quiz-score-display">0</span></div>
+      <div class="stat-item stat-timer">Time: <span id="quiz-timer">30</span>s</div>
+    </div>
+    <div class="game-content" id="hero-content"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/game-alex.js"></script>
+  <script src="js/game-password.js"></script>
+  <script src="js/game-phishing.js"></script>
+  <script src="js/game-malware.js"></script>
+  <script src="js/game-social.js"></script>
+  <script src="js/game-hero.js"></script>
+
+  <script>
+    // ── Auth Guard ──
+    const currentUser = Utils.requireAuth();
+    if (!currentUser) throw new Error('Not authenticated');
+
+    // ── Populate HUD ──
+    function updateHUD() {
+      const u = Auth.getCurrentUser();
+      if (!u) return;
+      document.getElementById('hud-avatar').textContent = u.avatar || '🦸';
+      document.getElementById('hud-username').textContent = u.username;
+      const lvl = Rewards.getLevel(u.xp);
+      document.getElementById('hud-level').textContent = `${lvl.icon} Level ${u.level || 1} — ${lvl.name}`;
+      document.getElementById('hud-xp-val').textContent = `${u.xp} XP`;
+      document.getElementById('hud-xp-bar').style.width = Rewards.getLevelProgress(u.xp) + '%';
+      document.getElementById('hud-streak').textContent = u.streak || 0;
+    }
+    updateHUD();
+
+    // ── Intro close ──
+    function closeIntro() {
+      document.getElementById('world-intro').style.opacity = '0';
+      document.getElementById('world-intro').style.transition = 'opacity 0.5s ease';
+      setTimeout(() => document.getElementById('world-intro').remove(), 500);
+    }
+    // Close intro if already played before
+    if (localStorage.getItem('cq_intro_seen')) closeIntro();
+    else { setTimeout(() => { localStorage.setItem('cq_intro_seen','1'); }, 3000); }
+
+    // ── Open/Close Games ──
+    function openGame(gameId) {
+      const flash = document.getElementById('zone-flash');
+      flash.classList.add('flash');
+      setTimeout(() => {
+        flash.classList.remove('flash');
+        document.getElementById(gameId).classList.remove('hidden');
+        // Initialize game
+        if (gameId === 'game-alex')     AlexGame.init();
+        if (gameId === 'game-password') PasswordGame.init();
+        if (gameId === 'game-phishing') PhishingGame.init();
+        if (gameId === 'game-malware')  MalwareGame.init();
+        if (gameId === 'game-social')   SocialGame.init();
+        if (gameId === 'game-hero')     HeroGame.init();
+      }, 200);
+    }
+
+    function closeGame(gameId) {
+      document.getElementById(gameId).classList.add('hidden');
+      updateHUD();
+    }
+
+    // ── Show zone label on hover (called from world.js) ──
+    function showZoneLabel(name) {
+      const el = document.getElementById('hud-zone-label');
+      el.textContent = name;
+      el.classList.add('visible');
+    }
+    function hideZoneLabel() {
+      document.getElementById('hud-zone-label').classList.remove('visible');
+    }
+
+    // Init 3D world after DOM ready
+    window.addEventListener('load', () => WorldEngine.init());
+  </script>
+</body>
+</html>

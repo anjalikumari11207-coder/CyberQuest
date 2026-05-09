@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberQuest — Enter the Cyber World</title>
+  <meta name="description" content="Learn cybersecurity through immersive 3D gaming. Protect yourself from real-world cyber threats.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { overflow: hidden; }
+
+    /* ── Particle Canvas ── */
+    #bg-canvas {
+      position: fixed; inset: 0; z-index: 0;
+    }
+
+    /* ── Login Page Layout ── */
+    .login-page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* ── Left Hero ── */
+    .hero-side {
+      flex: 1;
+      max-width: 520px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(0,245,255,0.1);
+      border: 1px solid rgba(0,245,255,0.3);
+      border-radius: 50px;
+      font-family: var(--font-game);
+      font-size: 0.7rem;
+      color: var(--cyan);
+      margin-bottom: 24px;
+      width: fit-content;
+      letter-spacing: 0.1em;
+    }
+    .hero-badge::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation: pulse 1.5s ease infinite; }
+
+    .hero-title {
+      font-family: var(--font-game);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .hero-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .hero-features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .hero-feat {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+    .hero-feat-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(0,245,255,0.08);
+      border: 1px solid var(--border-glow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Auth Card ── */
+    .auth-side {
+      width: 420px;
+      margin-left: 40px;
+    }
+    .auth-card {
+      background: rgba(8,16,32,0.92);
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 0 80px rgba(0,245,255,0.1), 0 24px 64px rgba(0,0,0,0.6);
+    }
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .auth-logo-text {
+      font-family: var(--font-game);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 30px var(--cyan);
+    }
+    .auth-logo-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: var(--font-game);
+      letter-spacing: 0.08em;
+    }
+
+    /* Auth Tabs */
+    .auth-tabs {
+      display: flex;
+      background: rgba(0,0,0,0.4);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      font-family: var(--font-game);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: transparent;
+      transition: var(--transition);
+      letter-spacing: 0.06em;
+    }
+    .auth-tab.active {
+      background: rgba(0,245,255,0.12);
+      color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0,245,255,0.15);
+    }
+
+    /* Form */
+    .auth-form { display: none; }
+    .auth-form.active { display: flex; flex-direction: column; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label {
+      font-family: var(--font-game);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .form-input-wrap { position: relative; }
+    .form-input-wrap input { padding-left: 44px; }
+    .form-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      z-index: 1;
+    }
+    .form-error {
+      color: var(--magenta);
+      font-size: 0.78rem;
+      padding: 10px 14px;
+      background: rgba(255,0,110,0.1);
+      border: 1px solid rgba(255,0,110,0.3);
+      border-radius: 8px;
+      display: none;
+    }
+    .form-error.show { display: block; animation: fadeInUp 0.3s ease; }
+
+    /* Avatar selector */
+    .avatar-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .avatar-opt {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid var(--border-glow);
+      font-size: 1.8rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .avatar-opt.selected {
+      border-color: var(--cyan);
+      background: rgba(0,245,255,0.1);
+      box-shadow: 0 0 15px rgba(0,245,255,0.3);
+    }
+
+    /* Submit button */
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-family: var(--font-game);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, var(--cyan), #0099cc);
+      color: #000;
+      box-shadow: 0 4px 24px rgba(0,245,255,0.4);
+      transition: var(--transition);
+      text-transform: uppercase;
+    }
+    .auth-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(0,245,255,0.6);
+    }
+    .auth-submit:active { transform: translateY(0); }
+
+    /* ── Responsive ── */
+    @media(max-width: 900px) {
+      .hero-side { display: none; }
+      .auth-side { width: 100%; max-width: 420px; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="scanline-overlay"></div>
+
+  <div class="login-page">
+    <!-- Hero -->
+    <div class="hero-side fade-in-up">
+      <div class="hero-badge">🛡️ CYBERSECURITY AWARENESS PLATFORM</div>
+      <h1 class="hero-title">
+        <span class="gradient-text">Master</span><br>
+        Cyber Defense<br>
+        <span style="color:var(--cyan)">Through Play</span>
+      </h1>
+      <p class="hero-subtitle">
+        Step into a 3D cyber world. Learn real-world cybersecurity skills through immersive simulations, games, and storylines — and become a CyberHero.
+      </p>
+      <div class="hero-features">
+        <div class="hero-feat">
+          <div class="hero-feat-icon">🌍</div>
+          <div><strong style="color:var(--text-main)">3D Interactive World</strong><br>Navigate a living Minecraft-style cyber city</div>
+        </div>
+        <div class="hero-feat">
+          <div class="hero-feat-icon">📖</div>
+          <div><strong style="color:var(--text-main)">Real-Life Scenarios</strong><br>Learn from Alex's story — from overconfident to CyberHero</div>
+        </div>
+        <div class="hero-feat">
+          <div class="hero-feat-icon">🏆</div>
+          <div><strong style="color:var(--text-main)">Rewards & Streaks</strong><br>Earn XP, badges and maintain daily streaks</div>
+        </div>
+        <div class="hero-feat">
+          <div class="hero-feat-icon">🔐</div>
+          <div><strong style="color:var(--text-main)">6 Game Modules</strong><br>Passwords, phishing, malware, social media & more</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="auth-side">
+      <div class="auth-card glow-border">
+        <div class="auth-logo">
+          <div class="auth-logo-text">⚡ CyberQuest</div>
+          <div class="auth-logo-sub">Your journey to cyber safety begins here</div>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')" id="tab-login">LOGIN</button>
+          <button class="auth-tab" onclick="switchTab('register')" id="tab-register">REGISTER</button>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth-form active" id="form-login" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <div class="form-input-wrap">
+              <span class="form-icon">👤</span>
+              <input type="text" id="login-user" placeholder="Enter your username" autocomplete="username" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="form-input-wrap">
+              <span class="form-icon">🔑</span>
+              <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password" required>
+            </div>
+          </div>
+          <div class="form-error" id="login-error"></div>
+          <button type="submit" class="auth-submit" id="btn-login">🚀 ENTER THE CYBERWORLD</button>
+        </form>
+
+        <!-- Register Form -->
+        <form class="auth-form" id="form-register" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Choose Your Hero Name</label>
+            <div class="form-input-wrap">
+              <span class="form-icon">👤</span>
+              <input type="text" id="reg-user" placeholder="Min. 3 characters" autocomplete="username" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Set Your Password</label>
+            <div class="form-input-wrap">
+              <span class="form-icon">🔑</span>
+              <input type="password" id="reg-pass" placeholder="Min. 6 characters" autocomplete="new-password" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Choose Your Avatar</label>
+            <div class="avatar-grid" id="avatar-grid">
+              <div class="avatar-opt selected" data-avatar="🦸" onclick="selectAvatar(this)">🦸</div>
+              <div class="avatar-opt" data-avatar="🧑‍💻" onclick="selectAvatar(this)">🧑‍💻</div>
+              <div class="avatar-opt" data-avatar="🕵️" onclick="selectAvatar(this)">🕵️</div>
+              <div class="avatar-opt" data-avatar="🐱‍💻" onclick="selectAvatar(this)">🐱‍💻</div>
+              <div class="avatar-opt" data-avatar="🤖" onclick="selectAvatar(this)">🤖</div>
+              <div class="avatar-opt" data-avatar="👾" onclick="selectAvatar(this)">👾</div>
+            </div>
+          </div>
+          <div class="form-error" id="reg-error"></div>
+          <button type="submit" class="auth-submit" id="btn-register">⚡ CREATE MY HERO</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/rewards.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // ── Redirect if already logged in ──
+    if (Auth.getCurrentUser()) window.location.href = 'world.html';
+
+    // ── Tab switching ──
+    function switchTab(tab) {
+      document.getElementById('form-login').classList.toggle('active', tab === 'login');
+      document.getElementById('form-register').classList.toggle('active', tab === 'register');
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    }
+
+    let selectedAvatar = '🦸';
+    function selectAvatar(el) {
+      document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedAvatar = el.dataset.avatar;
+    }
+
+    // ── Handle Login ──
+    function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login');
+      const errEl = document.getElementById('login-error');
+      btn.textContent = '⏳ Entering...';
+      btn.disabled = true;
+      errEl.classList.remove('show');
+
+      setTimeout(() => {
+        const result = Auth.login(
+          document.getElementById('login-user').value,
+          document.getElementById('login-pass').value
+        );
+        if (result.ok) {
+          btn.textContent = '✅ Welcome back!';
+          btn.style.background = 'linear-gradient(135deg, var(--green), #00aa00)';
+          setTimeout(() => window.location.href = 'world.html', 800);
+        } else {
+          errEl.textContent = result.msg;
+          errEl.classList.add('show');
+          btn.textContent = '🚀 ENTER THE CYBERWORLD';
+          btn.disabled = false;
+        }
+      }, 600);
+    }
+
+    // ── Handle Register ──
+    function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-register');
+      const errEl = document.getElementById('reg-error');
+      btn.textContent = '⏳ Creating hero...';
+      btn.disabled = true;
+      errEl.classList.remove('show');
+
+      setTimeout(() => {
+        const result = Auth.register(
+          document.getElementById('reg-user').value,
+          document.getElementById('reg-pass').value,
+          selectedAvatar
+        );
+        if (result.ok) {
+          btn.textContent = '🎉 Hero Created!';
+          btn.style.background = 'linear-gradient(135deg, var(--green), #00aa00)';
+          setTimeout(() => window.location.href = 'world.html', 800);
+        } else {
+          errEl.textContent = result.msg;
+          errEl.classList.add('show');
+          btn.textContent = '⚡ CREATE MY HERO';
+          btn.disabled = false;
+        }
+      }, 700);
+    }
+
+    // ── Particle Background ──
+    (function initParticles() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let W = canvas.width = window.innerWidth;
+      let H = canvas.height = window.innerHeight;
+      window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+
+      const PARTICLE_COUNT = 120;
+      const particles = Array.from({ length: PARTICLE_COUNT }, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: 1 + Math.random() * 2.5,
+        alpha: 0.2 + Math.random() * 0.5,
+        color: Math.random() > 0.5 ? '0,245,255' : Math.random() > 0.5 ? '191,90,242' : '255,0,110'
+      }));
+
+      let mouse = { x: W / 2, y: H / 2 };
+      window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        // Dark gradient background
+        const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H));
+        grad.addColorStop(0, '#080f22');
+        grad.addColorStop(1, '#030710');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Draw lines between close particles
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 120) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(0,245,255,${0.06 * (1 - dist/120)})`;
+              ctx.lineWidth = 0.5;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+
+          // Mouse interaction
+          const mx = particles[i].x - mouse.x;
+          const my = particles[i].y - mouse.y;
+          const md = Math.sqrt(mx*mx + my*my);
+          if (md < 150) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0,245,255,${0.15 * (1 - md/150)})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+
+          // Update
+          particles[i].x += particles[i].vx;
+          particles[i].y += particles[i].vy;
+          if (particles[i].x < 0 || particles[i].x > W) particles[i].vx *= -1;
+          if (particles[i].y < 0 || particles[i].y > H) particles[i].vy *= -1;
+
+          // Draw particle
+          ctx.beginPath();
+          ctx.arc(particles[i].x, particles[i].y, particles[i].r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${particles[i].color},${particles[i].alpha})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+</body>
+</html>
