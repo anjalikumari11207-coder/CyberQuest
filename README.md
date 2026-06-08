@@ -1,7 +1,7 @@
 # ⚡ CyberQuest — 3D Cybersecurity Awareness Platform
 
 > A fully offline, browser-based 3D cybersecurity awareness gaming website for students.
-> Learn real-world cyber defense skills through immersive gameplay and simulations.
+> Learn real-world cyber defense skills through immersive gameplay, quizzes and simulations.
 
 ---
 
